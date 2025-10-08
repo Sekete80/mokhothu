@@ -1,0 +1,513 @@
+/* Custom Styles for LUCT Reporting System with Gradients */
+
+.auth-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.card.shadow {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #eac566 0%, #764ba2 100%);
+    color: white;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.card.bg-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.card.bg-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.card.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+}
+
+.card.bg-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%) !important;
+}
+
+.card.bg-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%) !important;
+}
+
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #218838 0%, #1ba87e 100%);
+    transform: translateY(-2px);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+}
+
+.btn-warning:hover {
+    background: linear-gradient(135deg, #e0a800 0%, #e56a0c 100%);
+    transform: translateY(-2px);
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+}
+
+.btn-info:hover {
+    background: linear-gradient(135deg, #138496 0%, #5e36a8 100%);
+    transform: translateY(-2px);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #c82333 0%, #d91a7a 100%);
+    transform: translateY(-2px);
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    background: linear-gradient(145deg, #ffffff 0%, #fafbff 100%);
+}
+
+.navbar {
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%) !important;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    border-radius: 8px 8px 0 0;
+    margin-right: 4px;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+}
+
+.nav-tabs .nav-link:not(.active) {
+    background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.nav-tabs .nav-link:hover:not(.active) {
+    background: linear-gradient(145deg, #e9ecef 0%, #dee2e6 100%);
+}
+
+.topic-preview {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Role-based color coding with gradients */
+.role-student { 
+    background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.role-lecturer { 
+    background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.role-principal_lecturer { 
+    background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.role-program_leader { 
+    background: linear-gradient(135deg, #fd7e14 0%, #dc3545 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Badge gradients */
+.badge.bg-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.badge.bg-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.badge.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+}
+
+.badge.bg-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%) !important;
+}
+
+.badge.bg-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%) !important;
+}
+
+/* Modal gradients */
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-footer {
+    background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+}
+
+/* Alert gradients */
+.alert-success {
+    background: linear-gradient(145deg, #d4edda 0%, #c3e6cb 100%);
+    border: 1px solid #28a745;
+    color: #155724;
+}
+
+.alert-danger {
+    background: linear-gradient(145deg, #f8d7da 0%, #f1b0b7 100%);
+    border: 1px solid #dc3545;
+    color: #721c24;
+}
+
+.alert-warning {
+    background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%);
+    border: 1px solid #ffc107;
+    color: #856404;
+}
+
+.alert-info {
+    background: linear-gradient(145deg, #d1ecf1 0%, #b8e2e8 100%);
+    border: 1px solid #17a2b8;
+    color: #0c5460;
+}
+
+/* COMPACT FOOTER STYLES */
+footer {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: white;
+    margin-top: auto;
+    padding: 1rem 0 !important; /* Reduced padding */
+    font-size: 0.875rem; /* Smaller font size */
+}
+
+footer h5 {
+    color: #fff;
+    margin-bottom: 0.5rem;
+    font-size: 1rem; /* Smaller heading */
+    background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+footer .text-muted {
+    color: #bdc3c7 !important;
+    font-size: 0.8rem; /* Even smaller for muted text */
+}
+
+footer .container {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+footer .row {
+    margin-bottom: 0.5rem !important;
+}
+
+footer p {
+    margin-bottom: 0.25rem !important;
+    line-height: 1.3;
+}
+
+/* Remove extra spacing in footer columns */
+footer .col-md-6,
+footer .col-md-4,
+footer .col-md-3 {
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .topic-preview {
+        max-width: 150px;
+    }
+    
+    .card {
+        margin: 0.5rem;
+    }
+    
+    /* Even smaller footer on mobile */
+    footer {
+        padding: 0.75rem 0 !important;
+        font-size: 0.8rem;
+    }
+    
+    footer h5 {
+        font-size: 0.9rem;
+    }
+}
+
+/* Loading animations */
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.card {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.table tbody tr {
+    animation: slideIn 0.3s ease-in-out;
+}
+
+.table tbody tr:nth-child(odd) {
+    animation-delay: 0.1s;
+}
+
+.table tbody tr:nth-child(even) {
+    animation-delay: 0.2s;
+}
+
+/* Hover effects */
+.table-hover tbody tr:hover {
+    background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%);
+    transform: scale(1.01);
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+/* Print styles */
+@media print {
+    .navbar, .btn, .alert {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+        background: white !important;
+    }
+    
+    /* Remove gradients for printing */
+    .card-header {
+        background: #f8f9fa !important;
+        color: black !important;
+    }
+    
+    /* Hide footer in print */
+    footer {
+        display: none !important;
+    }
+}
+
+/* App.css */
+.min-vh-100 {
+    min-height: 100vh;
+}
+
+.auth-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.App {
+    display: flex;
+    flex-direction: column;
+    min-height: 40vh;
+}
+
+.flex-grow-1 {
+    flex-grow: 1;
+}
+
+.mt-auto {
+    margin-top: auto;
+}
+
+/* Ensure main content pushes footer to bottom */
+main {
+    flex: 1 0 auto;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+/* Status indicators with gradients */
+.status-pending {
+    background: linear-gradient(135deg, #ffc107 0%, #ffeb3b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.status-approved {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.status-forwarded {
+    background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.status-rejected {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Rating stars with gradient */
+.text-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #ff6b00 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Spinner gradient */
+.spinner-border.text-primary {
+    background: conic-gradient(from 0deg, #667eea, #764ba2, #667eea);
+    -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
+    animation: spinner-border 0.75s linear infinite;
+}
+
+/* Footer specific compact styles */
+.footer-compact {
+    padding: 0.75rem 0 !important;
+    font-size: 0.8rem;
+}
+
+.footer-compact .container {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+}
+
+.footer-compact .row {
+    margin-bottom: 0 !important;
+}
+
+.footer-compact .col {
+    padding: 0.25rem 0 !important;
+}
