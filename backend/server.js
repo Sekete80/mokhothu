@@ -10,12 +10,12 @@ const classRoutes = require('./routes/classes');
 const enrollmentRoutes = require('./routes/enrollment');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 
-// CORS configuration for production
+// CORS configuration - ADD YOUR FRONTEND URL
 app.use(cors({
     origin: [
-        'https://luct-frontend.onrender.com',
+        'https://mokhothu-fe.onrender.com', // Your frontend URL
         'http://localhost:3000',
         'http://localhost:3001'
     ],
