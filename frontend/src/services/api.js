@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://mokhothu.onrender.com/api';
 
 class ApiService {
     constructor() {
@@ -60,7 +60,7 @@ class ApiService {
 
     // Get all enrollments
     async getEnrollments() {
-        return this.request('/enrollment/enrollments');
+        return this.request('/enrollment');
     }
 
     // Get available students for enrollment
@@ -98,9 +98,8 @@ class ApiService {
         });
     }
 
-    // ==================== EXISTING ENDPOINTS (keep these) ====================
+    // ==================== AUTH ENDPOINTS ====================
     
-    // Auth endpoints
     async register(userData) {
         return this.request('/auth/register', {
             method: 'POST',
@@ -115,7 +114,8 @@ class ApiService {
         });
     }
 
-    // Report endpoints
+    // ==================== REPORT ENDPOINTS ====================
+    
     async getReports() {
         return this.request('/reports');
     }
@@ -183,7 +183,8 @@ class ApiService {
         });
     }
 
-    // User endpoints
+    // ==================== USER ENDPOINTS ====================
+    
     async getProfile() {
         return this.request('/users/profile');
     }
@@ -192,7 +193,8 @@ class ApiService {
         return this.request('/users');
     }
 
-    // Course endpoints (existing - keep for other parts of app)
+    // ==================== COURSE ENDPOINTS ====================
+    
     async getAllCourses() {
         return this.request('/courses');
     }
@@ -230,7 +232,8 @@ class ApiService {
         });
     }
 
-    // Class endpoints (existing - keep for other parts of app)
+    // ==================== CLASS ENDPOINTS ====================
+    
     async getAllClasses() {
         return this.request('/classes');
     }
@@ -284,7 +287,8 @@ class ApiService {
         return this.request(`/classes/${classId}/lectures`);
     }
 
-    // Dashboard statistics
+    // ==================== DASHBOARD & UTILITY ENDPOINTS ====================
+    
     async getDashboardStats() {
         return this.request('/dashboard/stats');
     }
@@ -308,6 +312,16 @@ class ApiService {
             console.error('Excel export failed:', error);
             throw error;
         }
+    }
+
+    // Health check
+    async healthCheck() {
+        return this.request('/health');
+    }
+
+    // Database test
+    async testDatabase() {
+        return this.request('/test-db');
     }
 }
 

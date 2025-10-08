@@ -125,29 +125,29 @@ const Dashboard = ({ user }) => {
     };
 
     // Download Excel function for program leader
-    const downloadExcel = async () => {
-        try {
-            const response = await fetch('http://localhost:5000/api/reports/export/excel', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            
-            if (!response.ok) throw new Error('Failed to download Excel');
-            
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `lecture-reports-${new Date().toISOString().split('T')[0]}.xlsx`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        } catch (error) {
-            setError('Failed to download Excel: ' + error.message);
-        }
-    };
+  const downloadExcel = async () => {
+    try {
+        const response = await fetch('https://mokhothu.onrender.com/api/reports/export/excel', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to download Excel');
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `lecture-reports-${new Date().toISOString().split('T')[0]}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    } catch (error) {
+        setError('Failed to download Excel: ' + error.message);
+    }
+};
 
     // Statistics for program leader
     const getProgramLeaderStats = () => {
