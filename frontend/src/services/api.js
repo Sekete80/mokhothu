@@ -116,6 +116,11 @@ class ApiService {
 
     // ==================== REPORT ENDPOINTS ====================
     
+    // NEW: Get forwarded reports for principal lecturer
+    async getForwardedReports() {
+        return this.request('/reports/forwarded');
+    }
+
     async getReports() {
         return this.request('/reports');
     }

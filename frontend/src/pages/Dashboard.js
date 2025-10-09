@@ -36,13 +36,13 @@ const Dashboard = ({ user }) => {
                 // Program leader: Load all reports (for review and management)
                 result = await apiService.getReports();
             } else if (user.role === 'principal_lecturer') {
-                // Principal lecturer: Load reports they need to review
-                result = await apiService.getReportsForReview();
+                // Principal lecturer: Load forwarded reports for their dashboard
+                result = await apiService.getForwardedReports();
             } else {
                 result = await apiService.getReports();
             }
             
-            setReports(result.reports || []);
+            setReports(result.data || []);
         } catch (error) {
             console.error('Failed to load reports:', error);
             setError('Failed to load reports: ' + error.message);
@@ -156,7 +156,7 @@ const Dashboard = ({ user }) => {
 
     // Lecturer-specific statistics
     const getLecturerStats = () => {
-        const myReports = reports.filter(report => report.user_id === user.id);
+        const myReports = reports.filter(report => report.lecturer_id === user.id);
         const pendingReports = myReports.filter(report => report.status === 'pending');
         const approvedReports = myReports.filter(report => report.status === 'approved');
         const forwardedReports = myReports.filter(report => report.status === 'forwarded');
@@ -215,7 +215,7 @@ const Dashboard = ({ user }) => {
     // Check if lecturer can edit their own report (only if it's pending)
     const canLecturerEditReport = (report) => {
         return user.role === 'lecturer' && 
-               report.user_id === user.id && 
+               report.lecturer_id === user.id && 
                report.status === 'pending';
     };
 
@@ -277,7 +277,7 @@ const Dashboard = ({ user }) => {
                         <div className="col-md-3">
                             <div className="card bg-primary text-white">
                                 <div className="card-body text-center">
-                                    <h3>{lecturerStats.totalReports}</h3>
+                                    <h3>{lecturerStats.totalReports || 0}</h3>
                                     <p>Total Reports</p>
                                 </div>
                             </div>
@@ -285,7 +285,7 @@ const Dashboard = ({ user }) => {
                         <div className="col-md-3">
                             <div className="card bg-success text-white">
                                 <div className="card-body text-center">
-                                    <h3>{lecturerStats.averageRating}/5</h3>
+                                    <h3>{lecturerStats.averageRating || 0}/5</h3>
                                     <p>Average Rating</p>
                                 </div>
                             </div>
@@ -293,7 +293,7 @@ const Dashboard = ({ user }) => {
                         <div className="col-md-3">
                             <div className="card bg-info text-white">
                                 <div className="card-body text-center">
-                                    <h3>{lecturerStats.totalClasses}</h3>
+                                    <h3>{lecturerStats.totalClasses || 0}</h3>
                                     <p>Classes Teaching</p>
                                 </div>
                             </div>
@@ -301,7 +301,7 @@ const Dashboard = ({ user }) => {
                         <div className="col-md-3">
                             <div className="card bg-warning text-dark">
                                 <div className="card-body text-center">
-                                    <h3>{lecturerStats.totalRatings}</h3>
+                                    <h3>{lecturerStats.totalRatings || 0}</h3>
                                     <p>Total Ratings</p>
                                 </div>
                             </div>
@@ -317,25 +317,25 @@ const Dashboard = ({ user }) => {
                             <div className="row text-center">
                                 <div className="col">
                                     <div className="border rounded p-3">
-                                        <h4 className="text-warning">{lecturerStats.pendingReview}</h4>
+                                        <h4 className="text-warning">{lecturerStats.pendingReview || 0}</h4>
                                         <p>Pending Review</p>
                                     </div>
                                 </div>
                                 <div className="col">
                                     <div className="border rounded p-3">
-                                        <h4 className="text-success">{lecturerStats.approved}</h4>
+                                        <h4 className="text-success">{lecturerStats.approved || 0}</h4>
                                         <p>Approved</p>
                                     </div>
                                 </div>
                                 <div className="col">
                                     <div className="border rounded p-3">
-                                        <h4 className="text-info">{lecturerStats.forwarded}</h4>
+                                        <h4 className="text-info">{lecturerStats.forwarded || 0}</h4>
                                         <p>Forwarded</p>
                                     </div>
                                 </div>
                                 <div className="col">
                                     <div className="border rounded p-3">
-                                        <h4 className="text-danger">{lecturerStats.rejected}</h4>
+                                        <h4 className="text-danger">{lecturerStats.rejected || 0}</h4>
                                         <p>Rejected</p>
                                     </div>
                                 </div>
@@ -349,13 +349,13 @@ const Dashboard = ({ user }) => {
                             <h5 className="card-title mb-0">Recent Report Activity</h5>
                         </div>
                         <div className="card-body">
-                            {reports.filter(r => r.user_id === user.id).slice(0, 5).map(report => (
+                            {reports.filter(r => r.lecturer_id === user.id).slice(0, 5).map(report => (
                                 <div key={report.id} className="d-flex justify-content-between align-items-center border-bottom py-2">
                                     <div>
                                         <strong>{report.class_name}</strong>
                                         <br/>
                                         <small className="text-muted">
-                                            {new Date(report.lecture_date).toLocaleDateString()} • 
+                                            {new Date(report.date_of_lecture).toLocaleDateString()} • 
                                             Status: <span className={`badge bg-${
                                                 report.status === 'approved' ? 'success' :
                                                 report.status === 'pending' ? 'warning' :
@@ -370,6 +370,11 @@ const Dashboard = ({ user }) => {
                                     </div>
                                 </div>
                             ))}
+                            {reports.filter(r => r.lecturer_id === user.id).length === 0 && (
+                                <div className="text-center py-4 text-muted">
+                                    <p>No reports found.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -399,13 +404,16 @@ const Dashboard = ({ user }) => {
                             <div className="card-body">
                                 <div className="row">
                                     <div className="col-md-8">
-                                        <h6 className="card-title">{rating.class_name}</h6>
+                                        <h6 className="card-title">{rating.course_name} - {rating.class_name}</h6>
                                         <p className="card-text mb-1">
-                                            <strong>Date:</strong> {new Date(rating.lecture_date).toLocaleDateString()}
+                                            <strong>Date:</strong> {new Date(rating.date_of_lecture).toLocaleDateString()}
                                         </p>
-                                        {rating.comments && (
+                                        <p className="card-text mb-1">
+                                            <strong>Student:</strong> {rating.student_name}
+                                        </p>
+                                        {rating.feedback && (
                                             <p className="card-text">
-                                                <strong>Feedback:</strong> "{rating.comments}"
+                                                <strong>Feedback:</strong> "{rating.feedback}"
                                             </p>
                                         )}
                                     </div>
@@ -436,6 +444,8 @@ const Dashboard = ({ user }) => {
 
     // Render Reports tab content for lecturers
     const renderLecturerReports = () => {
+        const lecturerReports = reports.filter(report => report.lecturer_id === user.id);
+        
         return (
             <>
                 {showReportForm && canCreateReport ? (
@@ -453,7 +463,7 @@ const Dashboard = ({ user }) => {
                     />
                 ) : (
                     <ReportList 
-                        reports={reports.filter(report => report.user_id === user.id)} 
+                        reports={lecturerReports} 
                         user={user}
                         onEditReport={canLecturerEditReport ? setEditingReport : null}
                         onRateReport={null}
@@ -551,7 +561,7 @@ const Dashboard = ({ user }) => {
                                     </button>
                                 )}
                                 {/* Only show New Report button for LECTURERS on reports tab */}
-                                {canCreateReport && user.role === 'lecturer' && activeTab === 'reports' && (
+                                {canCreateReport && user.role === 'lecturer' && activeTab === 'reports' && !showReportForm && (
                                     <button 
                                         className="btn btn-primary"
                                         onClick={() => setShowReportForm(true)}

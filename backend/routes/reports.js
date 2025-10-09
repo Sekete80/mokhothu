@@ -56,6 +56,48 @@ router.get('/', authenticateToken, async (req, res) => {
     }
 });
 
+// NEW: Get forwarded reports for principal lecturer dashboard
+router.get('/forwarded', authenticateToken, async (req, res) => {
+    try {
+        console.log('Get forwarded reports request from user:', req.user.role, req.user.name);
+        
+        // Only principal lecturers can access forwarded reports
+        if (req.user.role !== 'principal_lecturer') {
+            return res.status(403).json({ 
+                error: 'Access denied. Only principal lecturers can access forwarded reports.' 
+            });
+        }
+
+        const query = `
+            SELECT r.*, u.name as lecturer_full_name 
+            FROM reports r 
+            LEFT JOIN users u ON r.lecturer_id = u.id 
+            WHERE r.status = 'forwarded'
+            ORDER BY r.created_at DESC
+        `;
+        const params = [];
+
+        console.log('Executing forwarded reports query:', query);
+
+        const [reports] = await pool.execute(query, params);
+        
+        console.log(`Found ${reports.length} forwarded reports for principal lecturer ${req.user.name}`);
+
+        res.json({
+            success: true,
+            data: reports,
+            count: reports.length
+        });
+
+    } catch (error) {
+        console.error('Get forwarded reports error:', error);
+        res.status(500).json({ 
+            error: 'Failed to fetch forwarded reports',
+            details: error.message 
+        });
+    }
+});
+
 // NEW: Get lecturer's own reports only
 router.get('/my-reports', authenticateToken, async (req, res) => {
     try {

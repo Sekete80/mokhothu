@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import ApiService from '../services/api';
 
@@ -13,21 +12,23 @@ const PrincipalLecturerDashboard = ({ user }) => {
     const loadPrincipalLecturerData = async () => {
         try {
             setLoading(true);
+            setError('');
             
-            // Load reports for principal lecturer
-            const reportsResult = await ApiService.getReports();
+            // Load FORWARDED reports for principal lecturer
+            const reportsResult = await ApiService.getForwardedReports();
             setReports(reportsResult.data || []);
             
             // Load courses (principal lecturers can view all courses)
-            const coursesResult = await ApiService.getCourses();
+            const coursesResult = await ApiService.getAllCourses();
             setCourses(coursesResult.data || []);
             
             // Load classes (principal lecturers can view all classes)
-            const classesResult = await ApiService.getClasses();
+            const classesResult = await ApiService.getAllClasses();
             setClasses(classesResult.data || []);
             
         } catch (error) {
-            setError('Failed to load data: ' + error.message);
+            console.error('Failed to load principal lecturer data:', error);
+            setError('Failed to load data: ' + (error.message || 'Network error'));
         } finally {
             setLoading(false);
         }
@@ -37,7 +38,7 @@ const PrincipalLecturerDashboard = ({ user }) => {
         loadPrincipalLecturerData();
     }, [user]);
 
-    // Calculate statistics for principal lecturer
+    // Calculate statistics for principal lecturer - FIXED
     const calculateStats = () => {
         const totalReports = reports.length;
         const pendingReviews = reports.filter(report => report.status === 'pending').length;
