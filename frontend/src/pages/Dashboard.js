@@ -8,7 +8,7 @@ import ClassManagement from '../components/ClassManagement';
 import EnrollmentManagement from '../components/EnrollmentManagement';
 import StudentDashboard from './StudentDashboard';
 import PrincipalLectureDashboard from './PrincipalLectureDashboard';
-import ApiService from '../services/api';
+import apiService from '../services/api';
 
 const Dashboard = ({ user }) => {
     const [reports, setReports] = useState([]);
@@ -25,24 +25,26 @@ const Dashboard = ({ user }) => {
     const loadReports = async () => {
         try {
             setLoading(true);
+            setError('');
             let result;
             
             // Load reports based on user role
             if (user.role === 'lecturer') {
                 // Lecturer: Only load their own reports
-                result = await ApiService.getMyReports();
+                result = await apiService.getMyReports();
             } else if (user.role === 'program_leader') {
                 // Program leader: Load all reports (for review and management)
-                result = await ApiService.getReports();
+                result = await apiService.getReports();
             } else if (user.role === 'principal_lecturer') {
                 // Principal lecturer: Load reports they need to review
-                result = await ApiService.getReportsForReview();
+                result = await apiService.getReportsForReview();
             } else {
-                result = await ApiService.getReports();
+                result = await apiService.getReports();
             }
             
-            setReports(result.data || []);
+            setReports(result.reports || []);
         } catch (error) {
+            console.error('Failed to load reports:', error);
             setError('Failed to load reports: ' + error.message);
         } finally {
             setLoading(false);
@@ -51,7 +53,7 @@ const Dashboard = ({ user }) => {
 
     const loadMyClasses = async () => {
         try {
-            const result = await ApiService.getMyClasses();
+            const result = await apiService.getMyClasses();
             setMyClasses(result.data || []);
         } catch (error) {
             console.error('Failed to load classes:', error);
@@ -61,7 +63,7 @@ const Dashboard = ({ user }) => {
 
     const loadReportRatings = async () => {
         try {
-            const result = await ApiService.getMyReportRatings();
+            const result = await apiService.getMyReportRatings();
             setReportRatings(result.data || []);
         } catch (error) {
             console.error('Failed to load report ratings:', error);
@@ -125,29 +127,23 @@ const Dashboard = ({ user }) => {
     };
 
     // Download Excel function for program leader
-  const downloadExcel = async () => {
-    try {
-        const response = await fetch('https://mokhothu.onrender.com/api/reports/export/excel', {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        
-        if (!response.ok) throw new Error('Failed to download Excel');
-        
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `lecture-reports-${new Date().toISOString().split('T')[0]}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-    } catch (error) {
-        setError('Failed to download Excel: ' + error.message);
-    }
-};
+    const downloadExcel = async () => {
+        try {
+            const blob = await apiService.exportReportsToExcel();
+            
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `lecture-reports-${new Date().toISOString().split('T')[0]}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Failed to download Excel:', error);
+            setError('Failed to download Excel: ' + error.message);
+        }
+    };
 
     // Statistics for program leader
     const getProgramLeaderStats = () => {
@@ -160,7 +156,7 @@ const Dashboard = ({ user }) => {
 
     // Lecturer-specific statistics
     const getLecturerStats = () => {
-        const myReports = reports.filter(report => report.lecturer_id === user.id);
+        const myReports = reports.filter(report => report.user_id === user.id);
         const pendingReports = myReports.filter(report => report.status === 'pending');
         const approvedReports = myReports.filter(report => report.status === 'approved');
         const forwardedReports = myReports.filter(report => report.status === 'forwarded');
@@ -172,15 +168,6 @@ const Dashboard = ({ user }) => {
             ? ratedReports.reduce((sum, report) => sum + report.average_rating, 0) / ratedReports.length 
             : 0;
 
-        // Calculate attendance statistics
-        const totalAttendance = myReports.reduce((sum, report) => {
-            if (report.total_registered_students > 0) {
-                return sum + (report.actual_students_present / report.total_registered_students);
-            }
-            return sum;
-        }, 0);
-        const averageAttendance = myReports.length > 0 ? (totalAttendance / myReports.length) * 100 : 0;
-
         return {
             totalReports: myReports.length,
             pendingReview: pendingReports.length,
@@ -189,7 +176,6 @@ const Dashboard = ({ user }) => {
             rejected: rejectedReports.length,
             averageRating: Math.round(averageRating * 10) / 10,
             totalRatings: ratedReports.length,
-            averageAttendance: Math.round(averageAttendance),
             totalClasses: myClasses.length
         };
     };
@@ -201,18 +187,9 @@ const Dashboard = ({ user }) => {
             report.my_rating !== null && report.my_rating !== undefined
         ).length;
         
-        const attendanceRate = reports.length > 0 ? 
-            reports.reduce((sum, report) => {
-                if (report.total_registered_students > 0) {
-                    return sum + (report.actual_students_present / report.total_registered_students);
-                }
-                return sum;
-            }, 0) / reports.length * 100 : 0;
-        
         return { 
             totalClasses, 
-            ratedClasses, 
-            attendanceRate: Math.round(attendanceRate) 
+            ratedClasses
         };
     };
 
@@ -238,7 +215,7 @@ const Dashboard = ({ user }) => {
     // Check if lecturer can edit their own report (only if it's pending)
     const canLecturerEditReport = (report) => {
         return user.role === 'lecturer' && 
-               report.lecturer_id === user.id && 
+               report.user_id === user.id && 
                report.status === 'pending';
     };
 
@@ -316,16 +293,16 @@ const Dashboard = ({ user }) => {
                         <div className="col-md-3">
                             <div className="card bg-info text-white">
                                 <div className="card-body text-center">
-                                    <h3>{lecturerStats.averageAttendance}%</h3>
-                                    <p>Avg Attendance</p>
+                                    <h3>{lecturerStats.totalClasses}</h3>
+                                    <p>Classes Teaching</p>
                                 </div>
                             </div>
                         </div>
                         <div className="col-md-3">
                             <div className="card bg-warning text-dark">
                                 <div className="card-body text-center">
-                                    <h3>{lecturerStats.totalClasses}</h3>
-                                    <p>Classes Teaching</p>
+                                    <h3>{lecturerStats.totalRatings}</h3>
+                                    <p>Total Ratings</p>
                                 </div>
                             </div>
                         </div>
@@ -372,13 +349,13 @@ const Dashboard = ({ user }) => {
                             <h5 className="card-title mb-0">Recent Report Activity</h5>
                         </div>
                         <div className="card-body">
-                            {reports.filter(r => r.lecturer_id === user.id).slice(0, 5).map(report => (
+                            {reports.filter(r => r.user_id === user.id).slice(0, 5).map(report => (
                                 <div key={report.id} className="d-flex justify-content-between align-items-center border-bottom py-2">
                                     <div>
-                                        <strong>{report.course_name}</strong> - {report.class_name}
+                                        <strong>{report.class_name}</strong>
                                         <br/>
                                         <small className="text-muted">
-                                            {new Date(report.date_of_lecture).toLocaleDateString()} • 
+                                            {new Date(report.lecture_date).toLocaleDateString()} • 
                                             Status: <span className={`badge bg-${
                                                 report.status === 'approved' ? 'success' :
                                                 report.status === 'pending' ? 'warning' :
@@ -387,15 +364,8 @@ const Dashboard = ({ user }) => {
                                         </small>
                                     </div>
                                     <div className="text-end">
-                                        {report.average_rating > 0 && (
-                                            <div>
-                                                <small className="text-warning">
-                                                    <i className="bi bi-star-fill"></i> {report.average_rating}/5
-                                                </small>
-                                            </div>
-                                        )}
                                         <small className="text-muted">
-                                            {report.actual_students_present}/{report.total_registered_students} students
+                                            {report.topic_covered}
                                         </small>
                                     </div>
                                 </div>
@@ -429,18 +399,15 @@ const Dashboard = ({ user }) => {
                             <div className="card-body">
                                 <div className="row">
                                     <div className="col-md-8">
-                                        <h6 className="card-title">{rating.course_name} - {rating.class_name}</h6>
+                                        <h6 className="card-title">{rating.class_name}</h6>
                                         <p className="card-text mb-1">
-                                            <strong>Date:</strong> {new Date(rating.date_of_lecture).toLocaleDateString()}
+                                            <strong>Date:</strong> {new Date(rating.lecture_date).toLocaleDateString()}
                                         </p>
-                                        {rating.feedback && (
+                                        {rating.comments && (
                                             <p className="card-text">
-                                                <strong>Feedback:</strong> "{rating.feedback}"
+                                                <strong>Feedback:</strong> "{rating.comments}"
                                             </p>
                                         )}
-                                        <small className="text-muted">
-                                            Rated by: {rating.student_name}
-                                        </small>
                                     </div>
                                     <div className="col-md-4 text-end">
                                         <div className="display-4 text-warning">
@@ -486,7 +453,7 @@ const Dashboard = ({ user }) => {
                     />
                 ) : (
                     <ReportList 
-                        reports={reports.filter(report => report.lecturer_id === user.id)} 
+                        reports={reports.filter(report => report.user_id === user.id)} 
                         user={user}
                         onEditReport={canLecturerEditReport ? setEditingReport : null}
                         onRateReport={null}
