@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
-const auth = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 
 // GET /api/classes - Get all classes
-router.get('/', auth, async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
     try {
         console.log('Getting all classes...');
         const [classes] = await db.execute(`
@@ -30,7 +30,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // GET /api/classes/my-classes - Get lecturer's classes
-router.get('/my-classes', auth, async (req, res) => {
+router.get('/my-classes', authenticateToken, async (req, res) => {
     try {
         console.log('Getting my classes for user:', req.user.id);
         const [classes] = await db.execute(
@@ -53,7 +53,7 @@ router.get('/my-classes', auth, async (req, res) => {
 });
 
 // POST /api/classes - Create new class
-router.post('/', auth, async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
     try {
         console.log('Creating class:', req.body);
         

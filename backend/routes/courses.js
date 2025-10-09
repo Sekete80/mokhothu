@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
-const auth = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 
 // GET /api/courses - Get all courses
-router.get('/', auth, async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
     try {
         console.log('Getting all courses...');
         const [courses] = await db.execute('SELECT * FROM courses ORDER BY created_at DESC');
@@ -24,7 +24,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // POST /api/courses - Create new course
-router.post('/', auth, async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
     try {
         console.log('Creating course:', req.body);
         
@@ -69,55 +69,6 @@ router.post('/', auth, async (req, res) => {
             success: false,
             error: 'Failed to create course: ' + error.message 
         });
-    }
-});
-
-// PUT /api/courses/:id - Update course
-router.put('/:id', auth, async (req, res) => {
-    try {
-        const { course_name, description, credits, faculty } = req.body;
-        
-        const [result] = await db.execute(
-            'UPDATE courses SET course_name = ?, description = ?, credits = ?, faculty = ? WHERE id = ?',
-            [course_name, description, credits, faculty, req.params.id]
-        );
-        
-        if (result.affectedRows === 0) {
-            return res.status(404).json({
-                success: false,
-                error: 'Course not found'
-            });
-        }
-        
-        res.json({ 
-            success: true, 
-            message: 'Course updated successfully' 
-        });
-    } catch (error) {
-        console.error('Update course error:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// DELETE /api/courses/:id - Delete course
-router.delete('/:id', auth, async (req, res) => {
-    try {
-        const [result] = await db.execute('DELETE FROM courses WHERE id = ?', [req.params.id]);
-        
-        if (result.affectedRows === 0) {
-            return res.status(404).json({
-                success: false,
-                error: 'Course not found'
-            });
-        }
-        
-        res.json({ 
-            success: true, 
-            message: 'Course deleted successfully' 
-        });
-    } catch (error) {
-        console.error('Delete course error:', error);
-        res.status(500).json({ error: error.message });
     }
 });
 

@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
-const auth = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 
 // GET /api/reports - Get all reports
-router.get('/', auth, async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
     try {
         console.log('Getting all reports...');
         const [reports] = await db.execute(`
@@ -29,7 +29,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // GET /api/reports/my-reports - Get user's reports
-router.get('/my-reports', auth, async (req, res) => {
+router.get('/my-reports', authenticateToken, async (req, res) => {
     try {
         console.log('Getting my reports for user:', req.user.id);
         const [reports] = await db.execute(
@@ -52,7 +52,7 @@ router.get('/my-reports', auth, async (req, res) => {
 });
 
 // POST /api/reports - Create new report
-router.post('/', auth, async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
     try {
         console.log('Creating report for user:', req.user.id);
         console.log('Report data:', req.body);
