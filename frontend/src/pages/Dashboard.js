@@ -28,21 +28,17 @@ const Dashboard = ({ user }) => {
             setError('');
             let result;
             
-            // Load reports based on user role
             if (user.role === 'lecturer') {
-                // Lecturer: Only load their own reports
                 result = await apiService.getMyReports();
             } else if (user.role === 'program_leader') {
-                // Program leader: Load all reports (for review and management)
                 result = await apiService.getReports();
             } else if (user.role === 'principal_lecturer') {
-                // Principal lecturer: Load forwarded reports for their dashboard
                 result = await apiService.getForwardedReports();
             } else {
                 result = await apiService.getReports();
             }
             
-            setReports(result.data || []);
+            setReports(Array.isArray(result) ? result : result.data || []);
         } catch (error) {
             console.error('Failed to load reports:', error);
             setError('Failed to load reports: ' + error.message);
@@ -54,7 +50,7 @@ const Dashboard = ({ user }) => {
     const loadMyClasses = async () => {
         try {
             const result = await apiService.getMyClasses();
-            setMyClasses(result.data || []);
+            setMyClasses(Array.isArray(result) ? result : result.data || []);
         } catch (error) {
             console.error('Failed to load classes:', error);
             setMyClasses([]);
@@ -64,7 +60,7 @@ const Dashboard = ({ user }) => {
     const loadReportRatings = async () => {
         try {
             const result = await apiService.getMyReportRatings();
-            setReportRatings(result.data || []);
+            setReportRatings(Array.isArray(result) ? result : result.data || []);
         } catch (error) {
             console.error('Failed to load report ratings:', error);
             setReportRatings([]);
@@ -85,7 +81,6 @@ const Dashboard = ({ user }) => {
         }
     }, [user, activeTab]);
 
-    // Add event listener for student rating from enhanced dashboard
     useEffect(() => {
         const handleRateReport = (event) => {
             setRatingReport(event.detail);
@@ -119,18 +114,15 @@ const Dashboard = ({ user }) => {
         setShowRatingModal(false);
         setRatingReport(null);
         if (user.role === 'student') {
-            // Reload student data if they're on student dashboard
-            window.location.reload(); // Simple refresh for now
+            window.location.reload();
         } else {
             loadReports();
         }
     };
 
-    // Download Excel function for program leader
     const downloadExcel = async () => {
         try {
             const blob = await apiService.exportReportsToExcel();
-            
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -145,7 +137,6 @@ const Dashboard = ({ user }) => {
         }
     };
 
-    // Statistics for program leader
     const getProgramLeaderStats = () => {
         const forwardedReports = reports.filter(report => report.status === 'forwarded');
         return { 
@@ -154,15 +145,12 @@ const Dashboard = ({ user }) => {
         };
     };
 
-    // Lecturer-specific statistics
     const getLecturerStats = () => {
         const myReports = reports.filter(report => report.lecturer_id === user.id);
         const pendingReports = myReports.filter(report => report.status === 'pending');
         const approvedReports = myReports.filter(report => report.status === 'approved');
         const forwardedReports = myReports.filter(report => report.status === 'forwarded');
         const rejectedReports = myReports.filter(report => report.status === 'rejected');
-        
-        // Calculate average rating for lecturer's reports
         const ratedReports = myReports.filter(report => report.average_rating > 0);
         const averageRating = ratedReports.length > 0 
             ? ratedReports.reduce((sum, report) => sum + report.average_rating, 0) / ratedReports.length 
@@ -180,46 +168,30 @@ const Dashboard = ({ user }) => {
         };
     };
 
-    // Student-specific statistics (for basic view)
     const getStudentStats = () => {
         const totalClasses = reports.length;
-        const ratedClasses = reports.filter(report => 
-            report.my_rating !== null && report.my_rating !== undefined
-        ).length;
-        
-        return { 
-            totalClasses, 
-            ratedClasses
-        };
+        const ratedClasses = reports.filter(report => report.my_rating !== null && report.my_rating !== undefined).length;
+        return { totalClasses, ratedClasses };
     };
 
     const programLeaderStats = user.role === 'program_leader' ? getProgramLeaderStats() : {};
     const lecturerStats = user.role === 'lecturer' ? getLecturerStats() : {};
     const studentStats = user.role === 'student' ? getStudentStats() : {};
 
-    // Student can only rate approved/forwarded reports
     const canRateReport = (report) => {
-        return user.role === 'student' && 
-               report.status && 
-               (report.status === 'approved' || report.status === 'forwarded');
+        return user.role === 'student' && report.status && (report.status === 'approved' || report.status === 'forwarded');
     };
 
-    // Only lecturers can create reports
     const canCreateReport = user.role === 'lecturer';
 
-    // Only principal lecturers and program leaders can edit
     const canEditReport = (report) => {
         return user.role === 'principal_lecturer' || user.role === 'program_leader';
     };
 
-    // Check if lecturer can edit their own report (only if it's pending)
     const canLecturerEditReport = (report) => {
-        return user.role === 'lecturer' && 
-               report.lecturer_id === user.id && 
-               report.status === 'pending';
+        return user.role === 'lecturer' && report.lecturer_id === user.id && report.status === 'pending';
     };
 
-    // Render Classes tab content for lecturers
     const renderLecturerClasses = () => {
         if (myClasses.length === 0) {
             return (
@@ -265,14 +237,12 @@ const Dashboard = ({ user }) => {
         );
     };
 
-    // Render Monitoring tab content for lecturers
     const renderLecturerMonitoring = () => {
         return (
             <div className="row">
                 <div className="col-12">
                     <h4 className="mb-4">Teaching Performance Overview</h4>
                     
-                    {/* Quick Stats */}
                     <div className="row mb-4">
                         <div className="col-md-3">
                             <div className="card bg-primary text-white">
@@ -308,7 +278,6 @@ const Dashboard = ({ user }) => {
                         </div>
                     </div>
 
-                    {/* Report Status Overview */}
                     <div className="card mb-4">
                         <div className="card-header">
                             <h5 className="card-title mb-0">Report Status Distribution</h5>
@@ -343,7 +312,6 @@ const Dashboard = ({ user }) => {
                         </div>
                     </div>
 
-                    {/* Recent Activity */}
                     <div className="card">
                         <div className="card-header">
                             <h5 className="card-title mb-0">Recent Report Activity</h5>
@@ -382,7 +350,6 @@ const Dashboard = ({ user }) => {
         );
     };
 
-    // Render Rating tab content for lecturers
     const renderLecturerRatings = () => {
         if (reportRatings.length === 0) {
             return (
@@ -442,7 +409,6 @@ const Dashboard = ({ user }) => {
         );
     };
 
-    // Render Reports tab content for lecturers
     const renderLecturerReports = () => {
         const lecturerReports = reports.filter(report => report.lecturer_id === user.id);
         
@@ -475,19 +441,13 @@ const Dashboard = ({ user }) => {
         );
     };
 
-    // Render appropriate content based on active tab and user role
     const renderContent = () => {
-        // STUDENT VIEW - Enhanced Dashboard
         if (user.role === 'student') {
             return <StudentDashboard user={user} />;
         }
-
-        // PRINCIPAL LECTURER VIEW - Enhanced Dashboard
         if (user.role === 'principal_lecturer') {
             return <PrincipalLectureDashboard user={user} />;
         }
-
-        // LECTURER VIEW - Enhanced with Tabs
         if (user.role === 'lecturer') {
             switch (activeTab) {
                 case 'classes':
@@ -501,8 +461,6 @@ const Dashboard = ({ user }) => {
                     return renderLecturerReports();
             }
         }
-
-        // PROGRAM LEADER VIEW - Only show management tabs, NO report creation
         if (user.role === 'program_leader') {
             switch (activeTab) {
                 case 'courses':
@@ -513,7 +471,6 @@ const Dashboard = ({ user }) => {
                     return <EnrollmentManagement user={user} />;
                 case 'reports':
                 default:
-                    // Program Leaders only view and manage reports, cannot create them
                     return (
                         <ReportList 
                             reports={reports} 
@@ -526,8 +483,6 @@ const Dashboard = ({ user }) => {
                     );
             }
         }
-
-        // Default view (should not reach here)
         return (
             <div className="alert alert-warning">
                 No content available for your role.
@@ -537,7 +492,6 @@ const Dashboard = ({ user }) => {
 
     return (
         <div className="container">
-            {/* Dashboard Header - Hide for students and principal lecturers (they have their own header) */}
             {!['student', 'principal_lecturer'].includes(user.role) && (
                 <div className="row mb-4">
                     <div className="col-12">
@@ -560,7 +514,6 @@ const Dashboard = ({ user }) => {
                                         Download Excel
                                     </button>
                                 )}
-                                {/* Only show New Report button for LECTURERS on reports tab */}
                                 {canCreateReport && user.role === 'lecturer' && activeTab === 'reports' && !showReportForm && (
                                     <button 
                                         className="btn btn-primary"
@@ -576,7 +529,6 @@ const Dashboard = ({ user }) => {
                 </div>
             )}
 
-            {/* Lecturer Tabs - Only show for lecturers */}
             {user.role === 'lecturer' && (
                 <div className="row mb-4">
                     <div className="col-12">
@@ -589,9 +541,7 @@ const Dashboard = ({ user }) => {
                                     <i className="bi bi-journal-text me-2"></i>
                                     Reports
                                     {lecturerStats.pendingReview > 0 && (
-                                        <span className="badge bg-warning ms-2">
-                                            {lecturerStats.pendingReview}
-                                        </span>
+                                        <span className="badge bg-warning ms-2">{lecturerStats.pendingReview}</span>
                                     )}
                                 </button>
                             </li>
@@ -603,9 +553,7 @@ const Dashboard = ({ user }) => {
                                     <i className="bi bi-people me-2"></i>
                                     My Classes
                                     {lecturerStats.totalClasses > 0 && (
-                                        <span className="badge bg-primary ms-2">
-                                            {lecturerStats.totalClasses}
-                                        </span>
+                                        <span className="badge bg-primary ms-2">{lecturerStats.totalClasses}</span>
                                     )}
                                 </button>
                             </li>
@@ -626,9 +574,7 @@ const Dashboard = ({ user }) => {
                                     <i className="bi bi-star me-2"></i>
                                     Ratings
                                     {lecturerStats.totalRatings > 0 && (
-                                        <span className="badge bg-warning ms-2">
-                                            {lecturerStats.totalRatings}
-                                        </span>
+                                        <span className="badge bg-warning ms-2">{lecturerStats.totalRatings}</span>
                                     )}
                                 </button>
                             </li>
@@ -637,7 +583,6 @@ const Dashboard = ({ user }) => {
                 </div>
             )}
 
-            {/* Program Leader Tabs - Only show for program leaders */}
             {user.role === 'program_leader' && (
                 <div className="row mb-4">
                     <div className="col-12">
@@ -650,9 +595,7 @@ const Dashboard = ({ user }) => {
                                     <i className="bi bi-journal-text me-2"></i>
                                     Reports
                                     {programLeaderStats.totalForwarded > 0 && (
-                                        <span className="badge bg-danger ms-2">
-                                            {programLeaderStats.totalForwarded}
-                                        </span>
+                                        <span className="badge bg-danger ms-2">{programLeaderStats.totalForwarded}</span>
                                     )}
                                 </button>
                             </li>
@@ -688,11 +631,9 @@ const Dashboard = ({ user }) => {
                 </div>
             )}
 
-            {/* Statistics Cards - Show for lecturers on monitoring tab, others on reports tab */}
             {(activeTab === 'reports' && !['student', 'principal_lecturer'].includes(user.role)) || 
              (user.role === 'lecturer' && activeTab === 'monitoring') ? (
                 <>
-                    {/* Program Leader Stats */}
                     {user.role === 'program_leader' && (
                         <div className="row mb-4">
                             <div className="col-md-4">
@@ -737,7 +678,6 @@ const Dashboard = ({ user }) => {
                         </div>
                     )}
 
-                    {/* Lecturer Stats */}
                     {user.role === 'lecturer' && activeTab === 'reports' && (
                         <div className="row mb-4">
                             <div className="col-md-3">
@@ -752,7 +692,6 @@ const Dashboard = ({ user }) => {
                                     </div>
                                 </div>
                             </div>
-                            
                             <div className="col-md-3">
                                 <div className="card bg-warning text-dark shadow">
                                     <div className="card-body">
@@ -765,7 +704,6 @@ const Dashboard = ({ user }) => {
                                     </div>
                                 </div>
                             </div>
-
                             <div className="col-md-3">
                                 <div className="card bg-success text-white shadow">
                                     <div className="card-body">
@@ -795,34 +733,24 @@ const Dashboard = ({ user }) => {
                 </>
             ) : null}
 
-            {/* Error Alert */}
             {error && (
                 <div className="alert alert-danger alert-dismissible fade show" role="alert">
                     {error}
-                    <button 
-                        type="button" 
-                        className="btn-close" 
-                        onClick={() => setError('')}
-                    ></button>
+                    <button type="button" className="btn-close" onClick={() => setError('')}></button>
                 </div>
             )}
 
-            {/* Loading Spinner - Only for reports tab and specific roles */}
             {loading && activeTab === 'reports' && !['student', 'principal_lecturer'].includes(user.role) && (
                 <div className="text-center py-5">
                     <div className="spinner-border text-primary" role="status">
                         <span className="visually-hidden">Loading...</span>
                     </div>
-                    <p className="mt-2 text-muted">
-                        Loading reports...
-                    </p>
+                    <p className="mt-2 text-muted">Loading reports...</p>
                 </div>
             )}
 
-            {/* Main Content */}
             {!loading || activeTab !== 'reports' || ['student', 'principal_lecturer'].includes(user.role) ? renderContent() : null}
 
-            {/* Rating Modal - For all users who can rate */}
             {(user.role === 'student' || canRateReport(ratingReport)) && (
                 <RatingModal
                     report={ratingReport}
@@ -832,7 +760,6 @@ const Dashboard = ({ user }) => {
                 />
             )}
 
-            {/* Report Edit Form - For principal lecturers and program leaders */}
             {editingReport && (canEditReport(editingReport) || canLecturerEditReport(editingReport)) && (
                 <ReportEditForm 
                     report={editingReport}
