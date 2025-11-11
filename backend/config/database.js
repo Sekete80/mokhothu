@@ -1,35 +1,29 @@
-const mysql = require('mysql2/promise');
+// backend/config/database.js
+const { Pool } = require('pg');
 require('dotenv').config();
 
-const dbConfig = {
-    host: process.env.DB_HOST || 'sql7.freesqldatabase.com',
-    user: process.env.DB_USER || 'sql7801212',
-    password: process.env.DB_PASSWORD || '273T7MScHs',
-    database: process.env.DB_NAME || 'sql7801212',
-    port: process.env.DB_PORT || 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    connectTimeout: 60000,
-    ssl: false  // DISABLE SSL for FreeSQLDatabase
-};
-
-const pool = mysql.createPool(dbConfig);
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false } // Required by Render
+});
 
 // Test database connection
 const testConnection = async () => {
-    try {
-        const connection = await pool.getConnection();
-        console.log('✅ Connected to FreeSQLDatabase successfully');
-        
-        const [tables] = await connection.execute('SHOW TABLES');
-        console.log(`📋 Found ${tables.length} tables in database`);
-        
-        await connection.release();
-    } catch (err) {
-        console.error('❌ Database connection failed:', err.message);
-        console.error('Error code:', err.code);
-    }
+  try {
+    const client = await pool.connect();
+    console.log('✅ Connected to Render PostgreSQL successfully');
+
+    const res = await client.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public'
+    `);
+    console.log(`📋 Found ${res.rows.length} tables in database`);
+
+    client.release();
+  } catch (err) {
+    console.error('❌ Database connection failed:', err.message);
+  }
 };
 
 testConnection();

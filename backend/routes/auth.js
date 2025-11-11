@@ -1,3 +1,4 @@
+// backend/routes/auth.js
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -5,19 +6,20 @@ const pool = require('../config/database');
 
 const router = express.Router();
 
-// User registration
+// ==========================
+// 🔹 User Registration
+// ==========================
 router.post('/register', async (req, res) => {
     try {
         const { username, password, name, email, role } = req.body;
 
-        // Validate required fields
         if (!username || !password || !name || !email || !role) {
             return res.status(400).json({ error: 'All fields are required' });
         }
 
         // Check if user already exists
-        const [existingUsers] = await pool.execute(
-            'SELECT id FROM users WHERE username = ? OR email = ?',
+        const { rows: existingUsers } = await pool.query(
+            'SELECT id FROM users WHERE username = $1 OR email = $2',
             [username, email]
         );
 
@@ -26,45 +28,38 @@ router.post('/register', async (req, res) => {
         }
 
         // Hash password
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert new user
-        const [result] = await pool.execute(
-            'INSERT INTO users (username, password, name, email, role) VALUES (?, ?, ?, ?, ?)',
+        // Insert new user and get ID
+        const { rows } = await pool.query(
+            'INSERT INTO users (username, password, name, email, role) VALUES ($1, $2, $3, $4, $5) RETURNING id',
             [username, hashedPassword, name, email, role]
         );
 
+        const userId = rows[0].id;
+
         // Generate JWT token
         const token = jwt.sign(
-            { 
-                id: result.insertId,
-                username: username,
-                role: role
-            },
+            { id: userId, username, role },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
 
         res.status(201).json({
             message: 'User registered successfully',
-            token: token,
-            user: {
-                id: result.insertId,
-                username: username,
-                name: name,
-                email: email,
-                role: role
-            }
+            token,
+            user: { id: userId, username, name, email, role }
         });
 
     } catch (error) {
         console.error('Registration error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error during registration' });
     }
 });
 
-// User login
+// ==========================
+// 🔹 User Login
+// ==========================
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -73,9 +68,9 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ error: 'Username and password are required' });
         }
 
-        // Find user in database
-        const [users] = await pool.execute(
-            'SELECT * FROM users WHERE username = ?',
+        // Find user
+        const { rows: users } = await pool.query(
+            'SELECT * FROM users WHERE username = $1',
             [username]
         );
 
@@ -93,18 +88,14 @@ router.post('/login', async (req, res) => {
 
         // Generate JWT token
         const token = jwt.sign(
-            { 
-                id: user.id,
-                username: user.username,
-                role: user.role
-            },
+            { id: user.id, username: user.username, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
 
         res.json({
             message: 'Login successful',
-            token: token,
+            token,
             user: {
                 id: user.id,
                 username: user.username,
@@ -116,7 +107,7 @@ router.post('/login', async (req, res) => {
 
     } catch (error) {
         console.error('Login error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error during login' });
     }
 });
 

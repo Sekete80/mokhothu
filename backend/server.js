@@ -56,19 +56,27 @@ app.get('/api/health', (req, res) => {
 });
 
 // =====================
-// 🧠 TEST DATABASE CONNECTION
+// 🧠 TEST DATABASE CONNECTION (PostgreSQL)
 // =====================
 app.get('/api/test-db', async (req, res) => {
     try {
         const db = require('./config/database');
-        const connection = await db.getConnection();
-        const [tables] = await connection.execute('SHOW TABLES');
-        await connection.release();
-        
+
+        // Query public schema tables
+        const result = await db.query(`
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+            ORDER BY table_name
+        `);
+
+        const tables = result.rows.map(row => row.table_name);
+
         res.json({ 
             success: true, 
             message: 'Database connection successful',
-            tables: tables.length
+            tables,
+            total_tables: tables.length
         });
     } catch (err) {
         console.error('Database connection test failed:', err);
@@ -79,6 +87,8 @@ app.get('/api/test-db', async (req, res) => {
         });
     }
 });
+
+
 
 // =====================
 // ⚠️ ERROR HANDLER
